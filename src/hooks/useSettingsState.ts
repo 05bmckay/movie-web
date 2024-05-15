@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import { SubtitleStyling } from "@/stores/subtitles";
+import { usePreviewThemeStore } from "@/stores/theme";
 
 export function useDerived<T>(
   initial: T,
@@ -50,12 +51,18 @@ export function useSettingsState(
       }
     | undefined,
   enableThumbnails: boolean,
+  enableAutoplay: boolean,
 ) {
   const [proxyUrlsState, setProxyUrls, resetProxyUrls, proxyUrlsChanged] =
     useDerived(proxyUrls);
   const [backendUrlState, setBackendUrl, resetBackendUrl, backendUrlChanged] =
     useDerived(backendUrl);
   const [themeState, setTheme, resetTheme, themeChanged] = useDerived(theme);
+  const setPreviewTheme = usePreviewThemeStore((s) => s.setPreviewTheme);
+  const resetPreviewTheme = useCallback(
+    () => setPreviewTheme(theme),
+    [setPreviewTheme, theme],
+  );
   const [
     appLanguageState,
     setAppLanguage,
@@ -78,9 +85,16 @@ export function useSettingsState(
     resetEnableThumbnails,
     enableThumbnailsChanged,
   ] = useDerived(enableThumbnails);
+  const [
+    enableAutoplayState,
+    setEnableAutoplayState,
+    resetEnableAutoplay,
+    enableAutoplayChanged,
+  ] = useDerived(enableAutoplay);
 
   function reset() {
     resetTheme();
+    resetPreviewTheme();
     resetAppLanguage();
     resetSubStyling();
     resetProxyUrls();
@@ -88,6 +102,7 @@ export function useSettingsState(
     resetDeviceName();
     resetProfile();
     resetEnableThumbnails();
+    resetEnableAutoplay();
   }
 
   const changed =
@@ -98,7 +113,8 @@ export function useSettingsState(
     backendUrlChanged ||
     proxyUrlsChanged ||
     profileChanged ||
-    enableThumbnailsChanged;
+    enableThumbnailsChanged ||
+    enableAutoplayChanged;
 
   return {
     reset,
@@ -142,6 +158,11 @@ export function useSettingsState(
       state: enableThumbnailsState,
       set: setEnableThumbnailsState,
       changed: enableThumbnailsChanged,
+    },
+    enableAutoplay: {
+      state: enableAutoplayState,
+      set: setEnableAutoplayState,
+      changed: enableAutoplayChanged,
     },
   };
 }
